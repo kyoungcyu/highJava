@@ -1,0 +1,107 @@
+package board;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
+
+
+public class BoardDaoImpl implements BoardDao{
+	private Connection conn;
+	private Statement stmt;
+	private PreparedStatement pstmt;
+	private ResultSet rs;
+	
+	@Override
+	public int insertBoard(BoardVO bv) { //게시판 등록
+		int cnt= 0;
+		
+		try {
+			conn = JDBCUtil3.getConnection();
+			
+			String sql = "insert into jdbc_board(board_no , board_title ,"
+					 + " board_writer , board_date , board_content  )"
+					+ "values(? ,? ,? , select SYSDATE FROM DUAL ,? )";
+			pstmt =conn.prepareStatement(sql);
+			
+			pstmt.setInt(1, bv.getBoardNo());
+			pstmt.setString(2, bv.getBoardTitle());
+			pstmt.setString(3, bv.getBoardWriter());
+//			pstmt.setDate(4, bv.getBoardDate()); // 여기를 그냥 sysdate로 하면 되지 않을까?
+			pstmt.setString(5, bv.getBoardContent());
+			
+			cnt= pstmt.executeUpdate();
+
+		}catch (SQLException ex) {
+			throw new RuntimeException("게시판 등록중 예외발생!",ex);
+		}finally {
+			JDBCUtil3.close(conn, stmt, pstmt, rs);
+		}
+		
+		return cnt;
+	}
+
+	@Override
+	public int deleteBoard(BoardVO bv) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int updateBoard(BoardVO bv) {   
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean allDisplay(int boardNo) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public List<BoardVO> saearchBoard() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean checkBoard(String boardwriter) {
+
+	boolean isExist =false;	
+		
+	try {
+		conn=JDBCUtil3.getConnection();
+		
+		String sql= "select count(*) as cnt from jdbc_board "
+				+ "where board_writer = ? ";
+		pstmt = conn.prepareStatement(sql);
+		pstmt.setString(1, boardwriter);
+		
+		rs = pstmt.executeQuery();
+		
+		int cnt=0;
+		while(rs.next()) {
+			cnt = rs.getInt("cnt");
+		}
+		if(cnt > 0) {
+			isExist =true;
+		}
+	
+	} catch (SQLException ex) {
+		throw new RuntimeException("회원정보 체크중 예외 발생",ex);
+	}finally {
+		JDBCUtil3.close(conn, stmt, pstmt,rs);
+	}
+	
+	
+	return isExist;
+}
+
+		
+	
+
+}

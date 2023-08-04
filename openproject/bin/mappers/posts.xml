@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="posts">
+
+	 <select id="selectAllPost" resultType="kr.or.ddit.posts.vo.QnAVO" parameterType="kr.or.ddit.posts.vo.QnAVO">
+	
+		select post_num,
+			   user_id,
+			   post_title,
+			   post_content,
+			   post_date,
+			   post_answer		   
+		 from posts
+	
+	</select>
+
+	<insert id="insertPost" parameterType="kr.or.ddit.posts.vo.QnAVO">
+		<selectKey keyProperty="postNum" resultType="integer" order="BEFORE">
+			select POST_NUM.nextval FROM DUAL
+		</selectKey>
+	
+		insert into notice (post_num, user_id, post_title, post_content, post_date, post_answer) 
+		values (#{postNum}, #{userId}, #{postTitle}, #{postContent}, sysdate, #{postAnswer})
+	
+	</insert>
+	
+	<update id="updatePost" parameterType="kr.or.ddit.posts.vo.QnAVO">
+	
+		update posts 
+				set post_title = #{postTitle}, 
+				    post_content = #{postContent},
+				    post_date = #{postDate},
+				    post_answer = #{postAnswer}
+			  where user_id = #{userId}
+	</update>
+	
+	<delete id="deletePost" parameterType="Number">
+	
+		delete from posts where post_num = #{postNum}
+	
+	</delete>
+	
+	
+	<select id="getPost" resultType="kr.or.ddit.posts.vo.QnAVO">
+	
+		select post_num as postNum,
+			   user_id as userId,
+			   post_title as postTitle,
+			   post_content as postContent,
+			   post_date as postDate,
+			   post_answer as postAnswer
+		 from posts
+		 where post_num = #{postNum}
+	
+	</select>
+	
+	<select id="checkPost" resultType="String">
+	
+		select count(*) as cnt from posts where post_num = #{postNum}
+	
+	</select>
+	
+	<resultMap type="qnaVO" id="qnaMap">
+		<result column="post_num" property="postNum" />
+		<result column="user_id" property="userId" />
+		<result column="post_title" property="postTitle" />
+		<result column="post_content" property="postContent" />
+		<result column="post_date" property="postDate" />
+		<result column="post_answer" property="postAnswer" />
+	</resultMap>
+	
+	<!-- <select id="searchPost" resultMap="qnaMap">
+	
+		select *
+		 from posts
+		 where 1=1
+	<if test="postNum != null and postNum != ''">
+		and post_num = #{postNum}
+	</if>
+	<if test="userId != null and userId != ''">
+		and user_id = #{userId}
+	</if>
+	<if test="postTitle != null and postTitle != ''">
+		and post_title = #{postTitle}
+	</if>
+	<if test="postContent != null and postContent != ''">
+		and post_content like '%' || #{postContent} || '%'
+	</if>
+	<if test="postDate != null and postDate != ''">
+		and post_date = #{postDate}
+	</if>
+	<if test="postAnswer != null and postAnswer != ''">
+		and post_answer like '%' || #{postAnswer} || '%'
+	</if>
+	
+	</select> -->
+	
+</mapper>

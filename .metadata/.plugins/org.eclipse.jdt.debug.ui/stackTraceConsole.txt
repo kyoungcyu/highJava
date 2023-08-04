@@ -1,0 +1,6 @@
+ // XML문서를 생성하기 위한 DocumentBuilder 객체 생성
+	      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	      DocumentBuilder builder = dbf.newDocumentBuilder();
+
+	      // Document 객체 생성
+	      Document document = builder.parse(new File("./booklist.xml"));

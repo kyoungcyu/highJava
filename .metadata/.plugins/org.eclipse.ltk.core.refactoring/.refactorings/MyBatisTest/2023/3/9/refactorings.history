@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;member.xml&apos; to &apos;MyBatisTest/res/mappers&apos;&#x0D;&#x0A;- Original project: &apos;MyBatisTest&apos;&#x0D;&#x0A;- Destination element: &apos;MyBatisTest/res/mappers&apos;&#x0D;&#x0A;- Original element: &apos;member.xml&apos;" description="Copy file" destination="/res&lt;mappers" element1="res/mappers/member.xml" files="1" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1677757311352" units="0" version="1.0"/>
+</session>

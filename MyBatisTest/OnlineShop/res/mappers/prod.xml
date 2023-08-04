@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="posts">
+
+	<select id="selectAllProduct"
+		resultType="kr.or.ddit.product.vo.ProdVO"
+		parameterType="kr.or.ddit.product.vo.ProdVO">
+
+		select prod_num,
+		prod_name,
+		cat_num,
+		prod_stock
+		from product
+
+	</select>
+
+	<insert id="insertProduct"
+		parameterType="kr.or.ddit.product.vo.ProdVO">
+
+		insert into product (prod_num, prod_name, prod_price, prod_stock, cat_num)
+		values (#{prodNum}, #{prodName}, #{prodPrice}, #{prodStock},
+		#{catNum})
+
+	</insert>
+
+	<update id="updateProduct"
+		parameterType="kr.or.ddit.product.vo.ProdVO">
+
+		update product
+		set prod_price = #{prodPrice},
+		prod_stock = #{prodStock}
+		where prod_num = #{prodNum}
+	</update>
+
+	<delete id="deleteProduct" parameterType="String">
+
+		delete from product where prod_name = #{prodName}
+
+	</delete>
+
+
+	<select id="getProduct"
+		resultType="kr.or.ddit.product.vo.ProdVO">
+
+		select prod_num as prodNum,
+		prod_name as prodName,
+		prod_price as prodPrice,
+		prod_stock as prodStock,
+		cat_num as catNum
+		from product
+		where prod_num = #{prodNum}
+
+	</select>
+
+	<select id="checkProduct" resultType="String">
+
+		select count(*) as cnt from product where post_name = #{postName}
+
+	</select>
+
+	<resultMap type="prdVO" id="prdMap">
+		<result column="prod_num" property="prodNum" />
+		<result column="prod_name" property="prodName" />
+		<result column="prod_price" property="prodPrice" />
+		<result column="prod_stock" property="prodStock" />
+		<result column="cat_num" property="catNum" />
+	</resultMap>
+
+	<select id="searchProduct" resultMap="prdMap">
+
+		select *
+		from product
+		where 1=1
+		<if test="prodNum != null and prodNum != ''">
+			and prod_num = #{prodNum}
+		</if>
+		<if test="prodName != null and prodName != ''">
+			and prod_name = #{prodName}
+		</if>
+		<if test="prodPrice != null and prodPrice != ''">
+			and prod_price = #{prodPrice}
+		</if>
+		<if test="prodStock != null and prodStock != ''">
+			and prod_stock = #{prodStock}
+		</if>
+		<if test="catNum != null and catNum != ''">
+			and cat_num = #{catNum}
+		</if>
+
+
+	</select>
+
+</mapper>

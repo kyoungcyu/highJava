@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="onlineShop">
+
+	<!-- 경규 -->
+
+	<!-- 1.신규 회원을 회원 테이블에 추가하기 (insert) -->
+	<insert id="insertMember" parameterType="memVO">
+
+		insert into member
+		(userId, userPW,
+		userName, userPhone,
+		userAddr,userEmail, userRegnum)
+		values (#{userId},#{userPw},#{userName},#{userPhone}
+		,#{userAddr},#{userEmail},#{userRegNum})
+
+	</insert>
+
+	<!-- 2. 회원 정보를 이용해 해당 회원의 정보를 수정하기(update) -->
+	<update id="updateMember" parameterType="memVO">
+
+		update member
+		set
+		userPhone = #{userPhone},
+		userAddr = #{userAddr},
+		userEmail =
+		#{userEmail}
+		where userPW = #{userPw}
+
+	</update>
+
+
+	<!-- 3. 회원 테이블에서 id, password 를 where 조건으로 갖는 회원 객체를 가져오기(select) login -->
+
+	<select id="loginMember" parameterType="memVO"
+		resultType="memVO">
+
+		select *
+		from member
+		where USERID = #{userId}
+		and USERPW =
+		#{userPw}
+
+	</select>
+
+	<select id="checkMember" resultType="int">
+
+		select count(*) as cnt
+		from
+		member
+		where USERID = #{userId}
+
+	</select>
+
+	<!-- 4. 현재 로그인 된 회원의 정보를 이용해 해당 회원의 주문되지 않은 장바구니 목록을 가져오기(select) -->
+
+	<select id="selectUserAllCart" parameterType="cartVO"
+		resultType="cartVO">
+
+		select CARTNUM,
+		PRODID,
+		USERID,
+		PRODCOUNT,
+		CARTPAY
+		from cart
+		where USERID = #{userId}
+		and CARTNUM = #{cartNum}
+		and CARTPAY = 'n'
+	</select>
+
+	<insert id="insertCart" parameterType="cartVo">
+
+		insert into cart
+		(
+		CARTNUM,
+		PRODID, USERID, PRODCOUNT, CARTPAY
+		)
+		values
+		(
+		#{cartNum}, #{prodId},
+		#{userId}, #{prodCount}, #{cartPay}
+		)
+
+
+	</insert>
+
+
+	<!-- 5. 현재 로그인 된 회원의 정보를 이용해 장바구니의 주문 상태를 바꾸기(update) -->
+
+	<update id="payCart" parameterType="cartVO">
+
+		update cart
+		set cartPay = 'y'
+		where userId = #{userId}
+		and cartNum = #{cartNum}
+		and cartPay = 'n'
+
+	</update>
+
+	<delete id="logoutCart" parameterType="int">
+
+		delete from cart
+		where
+		cartNum = #{cartNum}
+		and cartPay = 'n'
+
+	</delete>
+
+
+	<!-- 6. 장바구니에 담긴 상품의 주문 개수 변경하기(update) -->
+	<update id="updateProdcount" parameterType="cartVO">
+
+		update cart
+		set
+		PRODCOUNT = #{prodCount}
+		where USERID = #{userId}
+		and PRODID = #{prodId}
+		and CARTPAY = 'n'
+
+	</update>
+
+	<select id="getCartNum" resultType="int">
+
+		select MAX(cartNum)
+		from cart
+
+	</select>
+
+	<!-- 7. 장바구니 품목 삭제하기(delete) -->
+
+
+	<delete id="deleteCart" parameterType="cartVO">
+
+		delete from cart
+		where
+		PRODID = #{prodId}
+		and USERID = #{userId}
+		and CARTPAY = 'n'
+
+	</delete>
+
+	<select id="selectCart" parameterType="cartVO"
+		resultType="cartVO">
+
+		select
+		PRODID,
+		PRODCOUNT
+		from cart
+		where CARTNUM = #{cartNum}
+		and USERID = #{userId}
+	</select>
+
+	<update id="payProdStock" parameterType="prodVO">
+		update product
+		set
+		PRODSTOCK = PRODSTOCK - #{prodStock}
+		where PRODID = #{prodId}
+	</update>
+
+	<insert id="insertOrder" parameterType="String">
+
+		insert into
+		ORDERTABLE(ORDERNUM, USERID, ORDERDATE, ORDERPRICE)
+		values (
+		ordernum_seq.nextval,
+		#{userId},
+		to_date(sysdate,'YYYY-MM-DD HH24:mi:ss'),
+		(select
+		SUM(PRODUCT.PRODPRICE
+		* CART.PRODCOUNT)
+		from PRODUCT , CART
+		where
+		product.PRODID = cart.PRODID
+		and cart.CARTPAY = 'n')
+		)
+
+	</insert>
+
+	<insert id="insertOrderDetails" parameterType="int">
+
+		INSERT INTO
+		orderdetail(ORDERNUM, PRODID, ORDERCOUNT)
+		SELECT OrderTable.orderNum,
+		cart.PRODID,
+		cart.PRODCOUNT
+		FROM ORDERTABLE, cart
+		WHERE cart.CARTPAY =
+		'n'
+		AND ORDERTABLE.ORDERNUM = (SELECT MAX(ORDERNUM)
+		FROM ORDERTABLE)
+
+	</insert>
+
+	<select id="selectAllUserOrders" parameterType="String"
+		resultType="orderVO">
+		select ORDERNUM,
+		ORDERDATE,
+		ORDERPRICE
+		from ORDERTABLE
+		where USERID = #{userId}
+	</select>
+
+	<select id="selectAllOrders" parameterType="String"
+		resultType="orderVO">
+		select ORDERNUM,
+		ORDERDATE,
+		ORDERPRICE
+		from ORDERTABLE
+	</select>
+
+	<select id="selectAllOrderDetails" parameterType="int"
+		resultType="orderDetailVO">
+		select ORDERNUM,
+		PRODID,
+		ORDERCOUNT
+		from ORDERDETAIL
+		where
+		ORDERNUM = #{orderNum}
+	</select>
+
+
+	<!-- 경민 prod.xml -->
+
+	<select id="selectAllProduct" parameterType="prodVO"
+		resultType="prodVO">
+
+		select PRODID,
+		PRODNAME,
+		PRODPRICE,
+		PRODSTOCK,
+		CATNUM
+		from
+		product
+
+	</select>
+
+	<insert id="insertProd" parameterType="prodVO">
+
+		insert into product
+		(PRODID, PRODNAME, PRODPRICE, PRODSTOCK, CATNUM)
+		values
+		(#{prodId},
+		#{prodName}, #{prodPrice}, #{prodStock}, #{catNum})
+
+	</insert>
+
+	<update id="updateProd" parameterType="prodVO">
+
+		update product
+		set
+		PRODPRICE = #{prodPrice},
+		PRODSTOCK = #{prodStock}
+		where PRODID =
+		#{prodId}
+
+	</update>
+
+	<delete id="deleteProd" parameterType="String">
+
+		delete from product
+		where
+		PRODID = #{prodId}
+
+	</delete>
+
+
+	<select id="checkProduct" resultType="int">
+
+		select count(*) as cnt
+		from
+		product
+		where PRODID = #{prodId}
+
+	</select>
+
+
+	<select id="selectProd" parameterType="String"
+		resultType="prodVO">
+
+		select PRODID,
+		PRODNAME,
+		PRODPRICE,
+		PRODSTOCK,
+		CATNUM
+		from
+		product
+		where PRODID = #{prodId}
+
+	</select>
+
+
+	<select id="selectCatProd" parameterType="int"
+		resultType="prodVO">
+
+		select PRODID,
+		PRODNAME,
+		PRODPRICE,
+		PRODSTOCK,
+		CATNUM
+		from
+		product
+		where CATNUM = #{catNum}
+
+	</select>
+
+	<select id="selectAllCategory" resultType="prodCatVO">
+
+		select CATNUM,
+		CATNAME
+		from CATEGORY
+
+	</select>
+
+
+	<select id="selectAllProd" resultType="prodVO">
+
+		select PRODID,
+		PRODNAME,
+		PRODPRICE,
+		PRODSTOCK,
+		CATNUM
+		from product
+
+	</select>
+
+
+
+	<!-- 경민 post.xml -->
+
+	<select id="selectAllQnA" resultType="postVO">
+
+		select POSTNUM,
+		USERID,
+		POSTTITLE,
+		POSTCONTENT,
+		POSTDATE,
+		POSTANSWER
+		from posts
+
+	</select>
+
+
+	<select id="selectUserAllQnA" parameterType="String"
+		resultType="postVO">
+
+		select POSTNUM,
+		USERID,
+		POSTTITLE,
+		POSTCONTENT,
+		POSTDATE,
+		POSTANSWER
+		from posts
+		where USERID = #{userId}
+
+	</select>
+
+	<insert id="insertQnA" parameterType="postVO">
+		<selectKey keyProperty="postNum" resultType="integer"
+			order="BEFORE">
+			select POSTS_NUM.nextval FROM DUAL
+		</selectKey>
+
+		insert into posts
+		(POSTNUM, USERID, POSTTITLE, POSTCONTENT, POSTDATE)
+		values
+		(#{postNum}, #{userId}, #{postTitle}, #{postContent},
+		sysdate)
+
+	</insert>
+
+
+	<update id="updateQnA" parameterType="postVO">
+
+		update posts
+		set
+		POSTCONTENT
+		= #{postContent}
+		where POSTNUM = #{postNum}
+		and USERID = #{userId}
+	</update>
+
+
+	<delete id="deleteQnA" parameterType="int">
+
+		delete from posts where
+		post_num = #{postNum}
+		and USERID = #{userId}
+
+	</delete>
+
+
+	<select id="selectQnA" parameterType="int" resultType="postVO">
+
+		select
+		POSTNUM,
+		USERID,
+		POSTTITLE,
+		POSTCONTENT,
+		POSTDATE,
+		POSTANSWER
+		from posts
+		where POSTNUM = #{postNum}
+
+	</select>
+
+
+	<select id="checkPost" parameterType="String" resultType="int">
+
+		select
+		count(*) as cnt
+		from posts
+		where POSTNUM = #{postNum}
+
+	</select>
+
+	<update id="commentQnA" parameterType="postVO">
+
+		update posts
+		set
+		POSTANSWER
+		= #{postAnswer}
+		where POSTNUM = #{postNum}
+
+	</update>
+
+	<!-- ************************************************************** -->
+	<!-- 경민 notice.xml -->
+
+	<select id="selectAllNotice" resultType="postVO">
+
+		select NOTICENUM as
+		postNum,
+		USERID as userId,
+		NOTICETITLE as postTitle,
+		NOTICECONTENT as
+		postContent,
+		NOTICEDATE as postDate
+		from notice
+
+	</select>
+
+	<insert id="insertNotice" parameterType="postVO">
+		<selectKey keyProperty="postNum" resultType="integer"
+			order="BEFORE">
+			select NOTICE_NUM.nextval FROM DUAL
+		</selectKey>
+
+		insert into notice
+		(NOTICENUM, USERID, NOTICETITLE, NOTICECONTENT,
+		NOTICEDATE)
+		values
+		(#{postNum}, #{userId}, #{postTitle}, #{postContent},
+		sysdate)
+
+	</insert>
+
+
+	<update id="updateNotice" parameterType="postVO">
+
+		update notice
+		set
+		NOTICECONTENT = #{postContent}
+		where NOTICENUM = #{postNum}
+		and USERID =
+		#{userId}
+
+	</update>
+
+	<delete id="deleteNotice" parameterType="int">
+
+		delete from notice
+		where
+		NOTICENUM = #{postNum}
+
+	</delete>
+
+
+	<select id="selectNotice" parameterType="int"
+		resultType="postVO">
+
+		select NOTICENUM as postNum,
+		USERID as userId,
+		NOTICETITLE as
+		postTitle,
+		NOTICECONTENT as postContent,
+		NOTICEDATE as postDate
+		from
+		notice
+		where NOTICENUM = #{postNum}
+
+	</select>
+
+	<select id="checkNotice" resultType="int">
+
+		select count(*) as cnt
+		from
+		notice
+		where NOTICENUM = #{postNum}
+
+	</select>
+
+
+</mapper>

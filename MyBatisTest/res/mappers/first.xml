@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="first">
+
+	<!-- 1.신규 회원을 회원 테이블에 추가하기 (insert) -->
+	<insert id="insertMember" parameterType="MemberVO">
+
+		insert into member
+		(userId, userPW,
+		userName, userPhone,
+		userAddr,userEmail, userRegnum)
+		
+		values (#{userId},#{userPW},#{userName},#{userPhone}
+		,#{userAddr},#{userEmail},#{userRegnum})
+
+	</insert>
+	<!-- 2. 회원 정보를 이용해 해당 회원의 정보를 수정하기(update) -->
+	<update id="updateUserPassword" parameterType="MemberVO" >
+  
+  	    update member 
+	  	   set  userPW = #{userPW}
+	     where userId=#{userId}
+	
+	</update>
+	
+	<update id="updateUserPhone" parameterType="MemberVO" >
+		
+	    update member 
+		   set  userPhone = #{userPhone}
+		 where userId=#{userId}
+	
+	</update>
+	
+	<update id="updateUserAddr" parameterType="MemberVO" >
+
+	    update member 
+		   set  userAddr = #{userAddr}
+		 where userId=#{userId}
+
+	</update>
+		
+	<update id="updateUserEmail" parameterType="MemberVO" >
+	
+	    update member 
+	       set  userEmail = #{userEmail}
+	     where userId=#{userId}
+	
+	</update>
+
+
+	<!-- 3. 회원 테이블에서 id, password 를 where 조건으로 갖는 회원 객체를 가져오기(select) login--> 
+	
+	<select id="getMember" parameterType="MemberVO" 
+		resultType="MemberVO">
+
+	    select * from Member 
+ 	     where userId= #{userId} 
+     	   and userPW = #{userPW}
+
+	</select>
+
+	<!-- 4. 현재 로그인 된 회원의 정보를 이용해 해당 회원의 주문되지 않은 장바구니 
+																목록을 가져오기(select) -->
+		
+	<select id="getCartList" parameterType="MemberVO" 
+		resultType="MemberVO">
+	
+         select a.prodNum , a.prodCount, b.prodName, b.prodPrice
+    	   from cart a
+           inner join product b 
+         on a.prodDid = b.prodDid
+         and a.userid = #{a.userid}
+         and a.CARTPAY = 'n';
+	</select>
+		
+
+	<!-- 5. 현재 로그인 된 회원의 정보를 이용해 장바구니의 주문 상태를 바꾸기(update) -->
+
+	<update id="updateStatus" parameterType="MemberVO" >
+	
+		update cart   
+		   set cartPay = 'y'
+		 where userId = #{userId}
+		   and cartNum = #{cartNum}
+	 	   and cartPay = 'n'
+ 	
+ 	</update>
+ 		 
+ 		 
+	<!-- 6.  장바구니에 담긴 상품의 주문 개수 변경하기(update) -->
+	<update id="updateProdcount" parameterType="CartVO" >
+	
+		update cart 
+		   set prodCount = #{prodCount}	
+		 where userId = #{userId}
+		   and prodDid =#{prodDid}
+		   and catPay = 'n'
+	
+	</update>
+	
+	
+	
+	<!-- 7. 장바구니 품목  삭제하기(delete)-->
+	
+
+	<delete id="deleteCart" parameterType="CartVO">
+  	
+  	   delete from cart 
+	    where userId = #{userId}
+	      and prodDid= #{prodDid}
+
+	</delete>
+
+	
+</mapper>

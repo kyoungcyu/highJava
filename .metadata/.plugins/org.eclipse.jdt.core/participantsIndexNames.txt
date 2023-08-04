@@ -1,0 +1,3 @@
+INDEX VERSION 1.131
+D:\A_teachingMaterial\highjava\.metadata\.plugins\org.eclipse.jst.jsp.core\jspsearch\1854138204.index
+\Exercise\src
